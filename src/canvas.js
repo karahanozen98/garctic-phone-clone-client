@@ -1,9 +1,12 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { MODES, PAN_LIMIT } from "./constants";
+import { socket } from "./socket";
+import ColorPalette from "./ColorPalette";
+import ToolBar from "./Toolbar";
 
 let lastPath = [];
 
-const Canvas = ({ settings, ...rest }) => {
+const Canvas = ({ settings, painting, scale, ...rest }) => {
   const width = Math.min(rest.width, PAN_LIMIT);
   const height = Math.min(rest.height, PAN_LIMIT);
   const [drawing, setDrawing] = useState(false);
@@ -16,7 +19,21 @@ const Canvas = ({ settings, ...rest }) => {
   const history = useRef([]);
   const redoHistory = useRef([]);
   const moving = useRef(false);
-  const importInput = useRef(null);
+  const scaleRatio = 1 / scale;
+
+  useEffect(() => {
+    // if (painting) {
+    //   console.log("repainting");
+    //   history.current = painting;
+    //   const ctx = getContext();
+    //   clearCanvas(ctx);
+    //   for (const item of history.current) {
+    //     getContext(item, ctx);
+    //     drawModes(item.mode, ctx, null, item.path);
+    //   }
+    //   render();
+    // }
+  }, [painting]);
 
   const prevent = (e) => {
     e.preventDefault();
@@ -121,6 +138,11 @@ const Canvas = ({ settings, ...rest }) => {
           drawCircle(path, ctx);
         }
         break;
+      case MODES.ERASER:
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 30;
+        point ? previewPen(point, ctx) : drawPen(path, ctx);
+        break;
       default:
         return;
     }
@@ -155,8 +177,8 @@ const Canvas = ({ settings, ...rest }) => {
   const drawRect = (path, ctx) => {
     ctx.beginPath();
     ctx.rect(
-      path[0][0],
-      path[0][1],
+      path[0][0] * scaleRatio,
+      path[0][1] * scaleRatio,
       path[1][0] - path[0][0],
       path[1][1] - path[0][1]
     );
@@ -176,25 +198,31 @@ const Canvas = ({ settings, ...rest }) => {
 
   const drawCircle = (path, ctx) => {
     ctx.beginPath();
-    ctx.arc(path[0][0], path[0][1], getDistance(path), 0, 2 * Math.PI);
+    ctx.arc(
+      path[0][0] * scaleRatio,
+      path[0][1] * scaleRatio,
+      getDistance(path),
+      0,
+      2 * Math.PI
+    );
     ctx.stroke();
   };
 
   const previewPen = (point, ctx) => {
     if (lastPath.length === 0) {
       ctx.beginPath();
-      ctx.moveTo(point[0], point[1]);
+      ctx.moveTo(point[0] * scaleRatio, point[1] * scaleRatio);
     }
-    ctx.lineTo(point[0], point[1]);
+    ctx.lineTo(point[0] * scaleRatio, point[1] * scaleRatio);
     ctx.stroke();
     lastPath.push(point);
   };
 
   const drawPen = (points, ctx) => {
     ctx.beginPath();
-    ctx.moveTo(points[0][0], points[0][1]);
+    ctx.moveTo(points[0][0] * scaleRatio, points[0][1] * scaleRatio);
     for (const p of points) {
-      ctx.lineTo(p[0], p[1]);
+      ctx.lineTo(p[0] * scaleRatio, p[1] * scaleRatio);
     }
     ctx.stroke();
   };
@@ -212,40 +240,25 @@ const Canvas = ({ settings, ...rest }) => {
       getContext(item, ctx);
       drawModes(item.mode, ctx, null, item.path);
     }
-  };
 
-  const undoCanvas = (e) => {
-    prevent(e);
-    if (history.current.length === 0) return;
-    redoHistory.current.push(history.current.pop());
-    drawCanvas(getContext());
-    render();
-  };
-
-  const redoCanvas = (e) => {
-    prevent(e);
-    if (redoHistory.current.length === 0) return;
-    history.current.push(redoHistory.current.pop());
-    drawCanvas(getContext());
-    render();
-  };
-
-  const setMode = (mode) => (e) => {
-    settings.current.mode = mode;
-    render();
+    // TODO
+    const painting = history.current.length === 0 ? [] : history.current;
+    socket.emit("draw", {
+      painting,
+    });
   };
 
   useEffect(() => {
     document.addEventListener("pointerup", onPointerUp);
     document.addEventListener("pointermove", onPointerMove);
-    getContext().setTransform(
-      1,
-      0,
-      0,
-      1,
-      -(PAN_LIMIT - width) / 2,
-      -(PAN_LIMIT - height) / 2
-    );
+    // getContext().setTransform(
+    //   1,
+    //   0,
+    //   0,
+    //   1,
+    //   -(PAN_LIMIT - width) / 2,
+    //   -(PAN_LIMIT - height) / 2
+    // );
     drawCanvas(getContext());
     updatePreview();
     return () => {
@@ -255,152 +268,40 @@ const Canvas = ({ settings, ...rest }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
-  const changeColor = (e) => {
-    settings.current.color = e.target.value;
-  };
-
-  const exportCanvas = () => {
-    const link = document.createElement("a");
-    const content = JSON.stringify(history.current);
-    const file = new Blob([content], { type: "application/json" });
-    link.href = URL.createObjectURL(file);
-    link.download = `canvas_export_${Date.now()}_${Math.floor(
-      Math.random() * 3
-    )}.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-  };
-
-  const importCanvas = (e) => {
-    if (e.target.files.length === 0) return;
-    const reader = new FileReader();
-    try {
-      reader.onload = () => {
-        history.current = JSON.parse(reader.result);
-        drawCanvas(getContext());
-        render();
-      };
-      reader.readAsText(e.target.files[0]);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const onImportClick = () => {
-    importInput.current?.click();
-  };
-
-  const modeButtons = [
-    {
-      mode: MODES.PAN,
-      title: "move",
-      icon: "move.svg",
-    },
-    {
-      mode: MODES.PEN,
-      title: "pen",
-      icon: "pen.svg",
-    },
-    {
-      mode: MODES.RECT,
-      title: "rectangle",
-      icon: "rectangle.svg",
-    },
-    {
-      mode: MODES.CIRCLE,
-      title: "circle",
-      icon: "circle.svg",
-    },
-  ];
-
   return (
-    <>
-      <canvas
-        ref={canvas}
-        style={{ border: "1px solid black" }}
-        width={width}
-        height={height}
-        onPointerDown={onPointerDown}
-        className={settings.current.mode === MODES.PAN ? "moving" : "drawing"}
+    <div style={{ display: "flex" }}>
+      <ColorPalette
+        value={settings.current.color}
+        onSelectColor={(color) => (settings.current.color = color)}
       />
       <div
-        className="menu"
-        onPointerDown={(e) => e.stopPropagation()}
-        onPointerUp={(e) => e.stopPropagation()}
-        aria-disabled={drawing}
+        className="custom-scroll"
+        style={{ overflow: "auto", touchAction: "none" }}
       >
-        <div className="preview">
-          <div
-            className="active"
-            ref={preview}
-            style={getPreviewActiveStyles()}
-          ></div>
-        </div>
-        <hr />
-        <button className="button color" type="button">
-          <input
-            type="color"
-            title="change color"
-            defaultValue={settings.current.color}
-            onChange={changeColor}
-          />
-        </button>
-        <hr />
-        {modeButtons.map((btn) => (
-          <button
-            className="button"
-            key={btn.mode}
-            type="button"
-            onClick={setMode(btn.mode)}
-            aria-pressed={settings.current.mode === btn.mode}
-          >
-            <img src={"assets/" + btn.icon} alt={btn.title} title={btn.title} />
-          </button>
-        ))}
-        <hr />
-        <button
-          className="button"
-          type="button"
-          onClick={undoCanvas}
-          disabled={history.current.length === 0}
-        >
-          <img src="assets/undo.svg" alt="undo" title="undo" />
-        </button>
-        <button
-          className="button"
-          type="button"
-          onClick={redoCanvas}
-          disabled={redoHistory.current.length === 0}
-        >
-          <img src="assets/redo.svg" alt="redo" title="red" />
-        </button>
-      </div>
-      <div
-        className="menu right"
-        onPointerDown={(e) => e.stopPropagation()}
-        onPointerUp={(e) => e.stopPropagation()}
-        aria-disabled={drawing}
-      >
-        <button
-          className="button"
-          type="button"
-          onClick={exportCanvas}
-          disabled={history.current.length === 0}
-        >
-          <img src="assets/export.svg" alt="export" title="export" />
-        </button>
-        <input
-          ref={importInput}
-          className="hidden"
-          type="file"
-          accept="application/json"
-          onChange={importCanvas}
+        <canvas
+          ref={canvas}
+          style={{
+            border: "1px solid black",
+            backgroundColor: "white",
+            touchAction: "none",
+          }}
+          width={width}
+          height={height}
+          onPointerDown={onPointerDown}
+          className={settings.current.mode === MODES.PAN ? "moving" : "drawing"}
         />
-        <button className="button" type="button" onClick={onImportClick}>
-          <img src="assets/import.svg" alt="import" title="import" />
-        </button>
       </div>
-    </>
+      <ToolBar
+        canvas={canvas}
+        context={context}
+        drawing={drawing}
+        settings={settings}
+        history={history}
+        redoHistory={redoHistory}
+        render={render}
+        drawCanvas={drawCanvas}
+      />
+    </div>
   );
 };
 

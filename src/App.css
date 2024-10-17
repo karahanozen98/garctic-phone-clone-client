@@ -1,5 +1,7 @@
-.App {
+.app {
   text-align: center;
+  background-image: linear-gradient(215deg, rgb(153, 16, 80) 0%, rgb(231, 77, 78) 85%);
+  min-height: 100vh;
 }
 
 .App-logo {
@@ -35,4 +37,27 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+div.custom-scroll::-webkit-scrollbar {
+  height:20px;
+}
+
+div.custom-scroll::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px #f2f2f2;
+  border-radius: 10px;
+}
+
+div.custom-scroll::-webkit-scrollbar-thumb {
+  background: #fff;
+  border-radius: 10px;
+}
+
+div.custom-scroll::-webkit-scrollbar-thumb::after {
+  background: #fff;
+  border-radius: 10px;
+}
+
+div.custom-scroll::-webkit-scrollbar-thumb:hover{
+  background: #e7e7e7;
 }
