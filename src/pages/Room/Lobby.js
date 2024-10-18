@@ -1,29 +1,23 @@
 import { useEffect } from "react";
 import Card from "../../components/Card";
 import { useRoomStore } from "../../store/roomStore";
-import { socket } from "../../socket";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import ProfileCard from "./ProfileCard";
 
 export default function Lobby() {
-  const roomUpdateEvent = "room-update";
   const room = useRoomStore((state) => state.room);
-  const setRoom = useRoomStore((state) => state.setRoom);
   const joinRoom = useRoomStore((state) => state.joinRoom);
+  const startGame = useRoomStore((state) => state.startGame);
   const { id } = useParams();
 
   useEffect(() => {
     joinRoom(id);
-
-    socket.on(roomUpdateEvent, ({ room: roomData }) => {
-      setRoom({ ...roomData });
-    });
-    return () => {
-      socket.off(roomUpdateEvent);
-    };
   }, []);
 
-  const handleStartGame = () => {};
+  const handleStartGame = () => {
+    startGame(id);
+  };
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text).then(
@@ -81,28 +75,5 @@ export default function Lobby() {
         {"Start The Game".toUpperCase()}
       </button>
     </Card>
-  );
-}
-
-function ProfileCard({ player, index }) {
-  return (
-    <div style={{ color: "#333", background: "#fdfdfd", borderRadius: 15 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 10,
-          margin: 10,
-        }}
-      >
-        <img
-          src={`https://garticphone.com/images/avatar/${index}.svg`}
-          width={100}
-          alt="avatar"
-        />
-        <h3>{player.username}</h3>
-      </div>
-    </div>
   );
 }

@@ -251,3 +251,27 @@ button.success:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
+
+.pen-thickness-outer-dot {
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pen-thickness-inner-dot {
+  background: #000;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.pen-thickness-outer-dot:hover {
+  background: #d3d3d3;
+  transform: scale(1.1);
+  .pen-thickness-inner-dot {
+      width: 7px;
+      height: 7px;
+    }
+}

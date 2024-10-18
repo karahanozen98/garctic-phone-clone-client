@@ -4,7 +4,7 @@ import { PageWrapper } from "../../components/PageWrapper";
 export default function NotFound() {
   return (
     <PageWrapper>
-      <Card>
+      <Card style={{ color: "#fff" }}>
         <h1>404 - Page Not Found</h1>
         <p>
           Sorry, the page you are looking for does not exist. You might have

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useAppSore } from "./store/appStore";
+import { toast } from "react-toastify";
 
 export const httpClient = axios.create({
   baseURL: "http://localhost:4000",
@@ -20,6 +21,7 @@ httpClient.interceptors.response.use(
   },
   (error) => {
     setLoading(false);
+    toast.error(error.response?.data?.result ?? error.message);
     return Promise.reject(error);
   }
 );

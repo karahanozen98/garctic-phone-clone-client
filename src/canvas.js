@@ -3,10 +3,13 @@ import { MODES, PAN_LIMIT } from "./constants";
 import { socket } from "./socket";
 import ColorPalette from "./ColorPalette";
 import ToolBar from "./Toolbar";
+import { useRoomStore } from "./store/roomStore";
+import { DrawGuessInput } from "./pages/Room/DrawGuessInput";
+import { BottomBar } from "./pages/Room/BottomBar";
 
 let lastPath = [];
 
-const Canvas = ({ settings, painting, scale, ...rest }) => {
+const Canvas = ({ settings, painting, scale, readonly, ...rest }) => {
   const width = Math.min(rest.width, PAN_LIMIT);
   const height = Math.min(rest.height, PAN_LIMIT);
   const [drawing, setDrawing] = useState(false);
@@ -20,20 +23,20 @@ const Canvas = ({ settings, painting, scale, ...rest }) => {
   const redoHistory = useRef([]);
   const moving = useRef(false);
   const scaleRatio = 1 / scale;
+  const quest = useRoomStore((state) => state.quest);
 
   useEffect(() => {
-    // if (painting) {
-    //   console.log("repainting");
-    //   history.current = painting;
-    //   const ctx = getContext();
-    //   clearCanvas(ctx);
-    //   for (const item of history.current) {
-    //     getContext(item, ctx);
-    //     drawModes(item.mode, ctx, null, item.path);
-    //   }
-    //   render();
-    // }
-  }, [painting]);
+    if (quest && quest?.type === 1) {
+      history.current = quest.content;
+      const ctx = getContext();
+      clearCanvas(ctx);
+      for (const item of history.current) {
+        getContext(item, ctx);
+        drawModes(item.mode, ctx, null, item.path);
+      }
+      render();
+    }
+  }, [quest]);
 
   const prevent = (e) => {
     e.preventDefault();
@@ -269,48 +272,68 @@ const Canvas = ({ settings, painting, scale, ...rest }) => {
   }, [width, height]);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <ColorPalette
-        value={settings.current.color}
-        onSelectColor={(color) => (settings.current.color = color)}
-      />
-      <div
-        className="custom-scroll"
-        style={{
-          overflow: "auto",
-          touchAction: "none",
-          background: "#332344",
-          border: "10px solid #332344",
-          borderRadius: 15,
-        }}
-      >
-        <div style={{ color: "white", fontWeight: "bold", padding: 10 }}>
-          <h2 style={{ color: "#40E0D0" }}>HEY IT'S TIME TO DRAW!</h2>
-          <h1>{"A Cat eating ice cream".toUpperCase()}</h1>
-        </div>
-        <canvas
-          ref={canvas}
+    <div
+      className="canvas-container"
+      style={{
+        margin: "auto",
+        transform: `scale(${scale})`,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <ColorPalette
+          value={settings.current.color}
+          onSelectColor={(color) => (settings.current.color = color)}
+        />
+        <div
+          className="custom-scroll"
           style={{
-            border: "1px solid black",
-            backgroundColor: "white",
+            overflow: "auto",
             touchAction: "none",
+            background: "#332344",
+            border: "10px solid #332344",
+            borderRadius: 15,
           }}
-          width={width}
-          height={height}
-          onPointerDown={onPointerDown}
-          className={settings.current.mode === MODES.PAN ? "moving" : "drawing"}
+        >
+          {quest?.type === 0 ? (
+            <div style={{ color: "white", fontWeight: "bold", padding: 10 }}>
+              <h2 style={{ color: "#40E0D0" }}>HEY IT'S TIME TO DRAW!</h2>
+              <h1>{quest?.content?.toUpperCase()}</h1>
+            </div>
+          ) : (
+            <div style={{ color: "white", fontWeight: "bold", padding: 10 }}>
+              <h2 style={{ color: "#40E0D0" }}>
+                HEY IT'S TIME TO GUESS THE DRAWING!
+              </h2>
+            </div>
+          )}
+          <canvas
+            ref={canvas}
+            style={{
+              border: "1px solid black",
+              backgroundColor: "white",
+              touchAction: "none",
+            }}
+            width={width}
+            height={height}
+            onPointerDown={onPointerDown}
+            className={
+              settings.current.mode === MODES.PAN ? "moving" : "drawing"
+            }
+          />
+        </div>
+        <ToolBar
+          canvas={canvas}
+          context={context}
+          drawing={drawing}
+          settings={settings}
+          history={history}
+          redoHistory={redoHistory}
+          render={render}
+          drawCanvas={drawCanvas}
         />
       </div>
-      <ToolBar
-        canvas={canvas}
-        context={context}
-        drawing={drawing}
-        settings={settings}
-        history={history}
-        redoHistory={redoHistory}
-        render={render}
-        drawCanvas={drawCanvas}
-      />
+      {!readonly && <BottomBar settings={settings} history={history} />}
+      {readonly && <DrawGuessInput />}
     </div>
   );
 };
