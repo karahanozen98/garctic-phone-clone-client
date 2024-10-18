@@ -269,15 +269,25 @@ const Canvas = ({ settings, painting, scale, ...rest }) => {
   }, [width, height]);
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <ColorPalette
         value={settings.current.color}
         onSelectColor={(color) => (settings.current.color = color)}
       />
       <div
         className="custom-scroll"
-        style={{ overflow: "auto", touchAction: "none" }}
+        style={{
+          overflow: "auto",
+          touchAction: "none",
+          background: "#332344",
+          border: "10px solid #332344",
+          borderRadius: 15,
+        }}
       >
+        <div style={{ color: "white", fontWeight: "bold", padding: 10 }}>
+          <h2 style={{ color: "#40E0D0" }}>HEY IT'S TIME TO DRAW!</h2>
+          <h1>{"A Cat eating ice cream".toUpperCase()}</h1>
+        </div>
         <canvas
           ref={canvas}
           style={{

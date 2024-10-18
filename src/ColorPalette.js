@@ -33,29 +33,34 @@ const ColorPalette = ({ value, onSelectColor }) => {
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
         padding: "10px",
         background: "#332344",
-        borderRadius: 0,
+        borderRadius: 10,
       }}
     >
-      {colors.map((color, index) => (
-        <div
-          key={index}
-          onClick={() => handleColorClick(color)}
-          style={{
-            backgroundColor: color,
-            width: "40px",
-            height: "40px",
-            margin: "5px",
-            cursor: "pointer",
-            border:
-              selectedColor === color ? "3px solid #fff" : "1px solid #ccc",
-          }}
-        ></div>
-      ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "auto auto",
+        }}
+      >
+        {colors.map((color, index) => (
+          <div
+            key={index}
+            onClick={() => handleColorClick(color)}
+            style={{
+              backgroundColor: color,
+              width: "20px",
+              height: "20px",
+              cursor: "pointer",
+              margin: 10,
+              border:
+                selectedColor === color ? "3px solid #fff" : "1px solid #ccc",
+              borderRadius: 5,
+            }}
+          ></div>
+        ))}
+      </div>
       <input
         type="color"
         title="Select color"

@@ -1,4 +1,4 @@
-import { MODEL_BUTTONS, MODES } from "./constants";
+import { MODEL_BUTTONS } from "./constants";
 
 export default function ToolBar({
   canvas,
@@ -78,30 +78,34 @@ export default function ToolBar({
       >
         {MODEL_BUTTONS.map((btn) => (
           <button
-            className="button"
+            className="primary"
             key={btn.mode}
             type="button"
             onClick={setMode(btn.mode)}
             aria-pressed={settings.current.mode === btn.mode}
           >
-            <img src={"assets/" + btn.icon} alt={btn.title} title={btn.title} />
+            <img
+              src={"/assets/" + btn.icon}
+              alt={btn.title}
+              title={btn.title}
+            />
           </button>
         ))}
         <button
-          className="button"
+          className="primary"
           type="button"
           onClick={undoCanvas}
           disabled={history.current.length === 0}
         >
-          <img src="assets/undo.svg" alt="undo" title="undo" />
+          <img src="/assets/undo.svg" alt="undo" title="undo" />
         </button>
         <button
-          className="button"
+          className="primary"
           type="button"
           onClick={redoCanvas}
           disabled={redoHistory.current.length === 0}
         >
-          <img src="assets/redo.svg" alt="redo" title="red" />
+          <img src="/assets/redo.svg" alt="redo" title="red" />
         </button>
         <div
           className="menu right"
@@ -110,12 +114,12 @@ export default function ToolBar({
           aria-disabled={drawing}
         >
           <button
-            className="button"
+            className="primary"
             type="button"
             onClick={exportCanvas}
             disabled={history.current.length === 0}
           >
-            <img src="assets/export.svg" alt="export" title="export" />
+            <img src="/assets/export.svg" alt="export" title="export" />
           </button>
         </div>
       </div>
