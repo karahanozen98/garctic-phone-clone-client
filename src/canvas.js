@@ -27,6 +27,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
   useEffect(() => {
     const ctx = getContext();
     clearCanvas(ctx);
+    history.current = [];
 
     if (quest && quest?.type === 1) {
       history.current = quest.content;

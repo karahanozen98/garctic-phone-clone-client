@@ -8,8 +8,10 @@ export default function Home() {
   const user = useAuthSore((state) => state.user);
   const logout = useAuthSore((state) => state.logout);
   const [isCreateRoomDialogOpen, setIsCreateRoomDialogOpen] = useState(false);
+  const [isJoinRoomDialogOpen, setIsJoinRoomDialogOpen] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(5);
   const [numberOfTurns, setNumberOfTurns] = useState(10);
+  const [roomCode, setRoomCode] = useState();
   const navigate = useNavigate();
 
   const handleCreate = async (e) => {
@@ -22,8 +24,8 @@ export default function Home() {
     navigate(`/room/${room.id}`);
   };
 
-  const handleJoin = async (e) => {
-    e.preventDefault();
+  const handleJoin = (e) => {
+    navigate(`/room/${roomCode}`);
   };
 
   const handleLogout = (e) => {
@@ -68,7 +70,10 @@ export default function Home() {
         >
           Create a Room
         </button>
-        <button className="primary" onClick={handleJoin}>
+        <button
+          className="primary"
+          onClick={() => setIsJoinRoomDialogOpen(true)}
+        >
           Join a Room
         </button>
       </div>
@@ -100,6 +105,28 @@ export default function Home() {
           </div>
           <button className="primary" type="submit">
             Create
+          </button>
+        </form>
+      </Dialog>
+      <Dialog
+        title={"Join Room"}
+        isOpen={isJoinRoomDialogOpen}
+        onClose={() => setIsJoinRoomDialogOpen(false)}
+      >
+        <form onSubmit={handleJoin} style={{ padding: 15 }}>
+          <div className="input-group">
+            <label htmlFor="username">Enter the Room Code?</label>
+            <input
+              type="text"
+              id="roomCode"
+              placeholder="01234"
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value)}
+              required
+            />
+          </div>
+          <button className="primary" type="submit">
+            Join
           </button>
         </form>
       </Dialog>
