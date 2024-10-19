@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const user = useAuthSore((state) => state.user);
+  const logout = useAuthSore((state) => state.logout);
   const [isCreateRoomDialogOpen, setIsCreateRoomDialogOpen] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(5);
   const [numberOfTurns, setNumberOfTurns] = useState(10);
@@ -25,8 +26,34 @@ export default function Home() {
     e.preventDefault();
   };
 
+  const handleLogout = (e) => {
+    e.preventDefault();
+    logout();
+  };
+
   return (
     <div className="login-card">
+      <div style={{ textAlign: "right" }}>
+        <button
+          onClick={handleLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "#f44336",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            padding: "10px 15px",
+            marginLeft: "auto",
+            marginBottom: "20px",
+            cursor: "pointer",
+            transition: "background-color 0.3s",
+          }}
+        >
+          <i className="fas fa-sign-out-alt"></i>
+          <span style={{}}>Logout</span>
+        </button>
+      </div>
       <img
         src="https://garticphone.com/images/avatar/1.svg"
         alt="avatar"

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useAppSore } from "./store/appStore";
+import { useAppStore } from "./store/appStore";
 import { toast } from "react-toastify";
 
 export const httpClient = axios.create({
@@ -7,7 +7,7 @@ export const httpClient = axios.create({
   withCredentials: true,
 });
 
-const setLoading = useAppSore.getState().setLoading;
+const setLoading = useAppStore.getState().setLoading;
 
 httpClient.interceptors.request.use((value) => {
   setLoading(true);

@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { useAuthSore } from "./store/authStore";
+import { useAuthSore } from "../../store/authStore";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginCard() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const login = useAuthSore((state) => state.login);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login({ username, password });
+    navigate("/");
   };
 
   return (

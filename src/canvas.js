@@ -1,6 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { MODES, PAN_LIMIT } from "./constants";
-import { socket } from "./socket";
 import ColorPalette from "./ColorPalette";
 import ToolBar from "./Toolbar";
 import { useRoomStore } from "./store/roomStore";
@@ -9,7 +8,7 @@ import { BottomBar } from "./pages/Room/BottomBar";
 
 let lastPath = [];
 
-const Canvas = ({ settings, painting, scale, readonly, ...rest }) => {
+const Canvas = ({ settings, scale, readonly, ...rest }) => {
   const width = Math.min(rest.width, PAN_LIMIT);
   const height = Math.min(rest.height, PAN_LIMIT);
   const [drawing, setDrawing] = useState(false);
@@ -26,9 +25,11 @@ const Canvas = ({ settings, painting, scale, readonly, ...rest }) => {
   const quest = useRoomStore((state) => state.quest);
 
   useEffect(() => {
+    const ctx = getContext();
+    clearCanvas(ctx);
+
     if (quest && quest?.type === 1) {
       history.current = quest.content;
-      const ctx = getContext();
       clearCanvas(ctx);
       for (const item of history.current) {
         getContext(item, ctx);
@@ -243,12 +244,6 @@ const Canvas = ({ settings, painting, scale, readonly, ...rest }) => {
       getContext(item, ctx);
       drawModes(item.mode, ctx, null, item.path);
     }
-
-    // TODO
-    const painting = history.current.length === 0 ? [] : history.current;
-    socket.emit("draw", {
-      painting,
-    });
   };
 
   useEffect(() => {
@@ -279,11 +274,20 @@ const Canvas = ({ settings, painting, scale, readonly, ...rest }) => {
         transform: `scale(${scale})`,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <ColorPalette
-          value={settings.current.color}
-          onSelectColor={(color) => (settings.current.color = color)}
-        />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+        }}
+      >
+        {quest.type === 0 && (
+          <ColorPalette
+            value={settings.current.color}
+            onSelectColor={(color) => (settings.current.color = color)}
+          />
+        )}
         <div
           className="custom-scroll"
           style={{
@@ -321,16 +325,18 @@ const Canvas = ({ settings, painting, scale, readonly, ...rest }) => {
             }
           />
         </div>
-        <ToolBar
-          canvas={canvas}
-          context={context}
-          drawing={drawing}
-          settings={settings}
-          history={history}
-          redoHistory={redoHistory}
-          render={render}
-          drawCanvas={drawCanvas}
-        />
+        {quest.type === 0 && (
+          <ToolBar
+            canvas={canvas}
+            context={context}
+            drawing={drawing}
+            settings={settings}
+            history={history}
+            redoHistory={redoHistory}
+            render={render}
+            drawCanvas={drawCanvas}
+          />
+        )}
       </div>
       {!readonly && <BottomBar settings={settings} history={history} />}
       {readonly && <DrawGuessInput />}

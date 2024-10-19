@@ -4,18 +4,23 @@ import { httpClient } from "../httpClient";
 export const useAuthSore = create((set) => ({
   user: null,
   login: async ({ username, password }) => {
-    httpClient
-      .post("/authentication/login", {
-        username,
-        password,
-      })
-      .then(({ data: user }) => set((state) => ({ user: user })));
+    const { data } = await httpClient.post("/authentication/login", {
+      username,
+      password,
+    });
+    set((state) => ({ user: data }));
   },
-  logout: () => set({ user: null }),
-  me: async () => {
+  logout: async () => {
+    await httpClient.post("/authentication/logout");
+    window.location.href = "/login";
+  },
+  handleAuthentication: async () => {
     try {
-      const response = await httpClient.get("/authentication/me");
-      set((state) => ({ user: response.data }));
-    } catch (error) {}
+      const { data } = await httpClient.get("/authentication/me");
+      set((state) => ({ user: data }));
+    } catch (error) {
+      document.cookie.replace("token", "");
+      window.location.href = "/login";
+    }
   },
 }));

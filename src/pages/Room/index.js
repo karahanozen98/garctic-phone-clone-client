@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, MODES } from "../../constants";
 import { useWindowSize } from "../../hooks";
 import Canvas from "../../Canvas";
@@ -8,15 +8,19 @@ import Lobby from "./Lobby";
 import { PageWrapper } from "../../components/PageWrapper";
 import { socket } from "../../socket";
 import UserEntry from "./UserEntry";
+import { useAppStore } from "../../store/appStore";
 
 function RoomPage() {
-  const roomUpdateEvent = "room-update";
-  const [painting, setPainting] = useState();
   const params = useParams();
+  const roomUpdateEvent = `room-update-${params.id}`;
+  const isLoading = useAppStore((state) => state.isLoading);
   const room = useRoomStore((state) => state.room);
   const setRoom = useRoomStore((state) => state.setRoom);
   const getRoomById = useRoomStore((state) => state.getRoomById);
   const getMyQuest = useRoomStore((state) => state.getMyQuest);
+  const quest = useRoomStore((state) => state.quest);
+  const setBgPrimary = useAppStore((state) => state.setBgPrimary);
+  const setBgSecondary = useAppStore((state) => state.setBgSecondary);
   const settings = useRef({
     stroke: 5,
     color: "#000000",
@@ -29,7 +33,11 @@ function RoomPage() {
   }, [params.id, getRoomById]);
 
   useEffect(() => {
-    if ((room && room?.status === 2) || room?.status === 3) {
+    if (room && room?.status === 2) {
+      setBgPrimary();
+      getMyQuest(params.id);
+    } else if (room && room.status === 3) {
+      setBgSecondary();
       getMyQuest(params.id);
     }
   }, [room, getMyQuest, params.id]);
@@ -44,8 +52,8 @@ function RoomPage() {
   }, []);
 
   return (
-    <PageWrapper>
-      {!room && (
+    <PageWrapper isPrivate={true}>
+      {!isLoading && !room && (
         <div style={{ color: "#fff" }}>
           <h1>Room not found, you may want to go back</h1>
           <a href="/">Home</a>
@@ -53,22 +61,20 @@ function RoomPage() {
       )}
       {room?.status === 0 && <Lobby />}
       {room?.status === 1 && <UserEntry />}
-      {room?.status === 2 && (
+      {room?.status === 2 && quest && (
         <Canvas
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
           settings={settings}
           scale={size.scale}
-          painting={painting}
         />
       )}
-      {room?.status === 3 && (
+      {room?.status === 3 && quest && (
         <Canvas
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
           settings={settings}
           scale={size.scale}
-          painting={painting}
           readonly
         />
       )}
