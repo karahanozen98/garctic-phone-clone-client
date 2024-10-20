@@ -38,3 +38,10 @@ export const MODEL_BUTTONS = [
     icon: "circle.svg",
   },
 ];
+
+export const GAME_STATUS = {
+  WaitingForStart: 0,
+  WaitingForInitialSentences: 1,
+  WaitingForDrawings: 2,
+  WaitingForSentences: 3,
+};

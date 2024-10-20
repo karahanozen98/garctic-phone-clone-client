@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef, useState } from "react";
-import { MODES, PAN_LIMIT } from "./constants";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MODES, PAN_LIMIT } from "./constants";
 import ColorPalette from "./ColorPalette";
 import ToolBar from "./Toolbar";
 import { useRoomStore } from "./store/roomStore";
@@ -9,8 +9,8 @@ import { BottomBar } from "./pages/Room/BottomBar";
 let lastPath = [];
 
 const Canvas = ({ settings, scale, readonly, ...rest }) => {
-  const width = Math.min(rest.width, PAN_LIMIT);
-  const height = Math.min(rest.height, PAN_LIMIT);
+  const width = Math.min(CANVAS_WIDTH, PAN_LIMIT);
+  const height = Math.min(CANVAS_HEIGHT, PAN_LIMIT);
   const [drawing, setDrawing] = useState(false);
   const [, render] = useReducer((prev) => !prev, false);
   const canvas = useRef(null);

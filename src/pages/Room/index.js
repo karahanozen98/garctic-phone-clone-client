@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, MODES } from "../../constants";
+import { GAME_STATUS, MODES } from "../../constants";
 import { useWindowSize } from "../../hooks";
 import Canvas from "../../Canvas";
 import { useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { PageWrapper } from "../../components/PageWrapper";
 import { socket } from "../../socket";
 import UserEntry from "./UserEntry";
 import { useAppStore } from "../../store/appStore";
+import SoundPlayer from "../../components/SoundPlayer";
 
 function RoomPage() {
   const params = useParams();
@@ -21,6 +22,10 @@ function RoomPage() {
   const quest = useRoomStore((state) => state.quest);
   const setBgPrimary = useAppStore((state) => state.setBgPrimary);
   const setBgSecondary = useAppStore((state) => state.setBgSecondary);
+  const previousGameStatus = useRef();
+  const gameStartAudioRef = useRef();
+  const gameDrawingAudioRef = useRef();
+  const gameSentenceAudioRef = useRef();
   const settings = useRef({
     stroke: 5,
     color: "#000000",
@@ -33,13 +38,22 @@ function RoomPage() {
   }, [params.id, getRoomById]);
 
   useEffect(() => {
-    if (room && room?.status === 2) {
+    if (!room) {
+      return;
+    }
+    if (room.status === GAME_STATUS.WaitingForDrawings) {
       setBgPrimary();
       getMyQuest(params.id);
-    } else if (room && room.status === 3) {
+    } else if (room.status === GAME_STATUS.WaitingForSentences) {
       setBgSecondary();
       getMyQuest(params.id);
     }
+    // if game status changes play bgm
+    if (previousGameStatus.current !== room.status) {
+      playGameStatusChangeSounds(room.status);
+    }
+
+    previousGameStatus.current = room.status;
   }, [room, getMyQuest, params.id]);
 
   useEffect(() => {
@@ -51,33 +65,45 @@ function RoomPage() {
     };
   }, []);
 
+  const playGameStatusChangeSounds = (status) => {
+    switch (status) {
+      case GAME_STATUS.WaitingForInitialSentences:
+        gameStartAudioRef.current.play();
+        break;
+      case GAME_STATUS.WaitingForDrawings:
+        gameDrawingAudioRef.current.play();
+        break;
+      case GAME_STATUS.WaitingForSentences:
+        gameSentenceAudioRef.current.play();
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <PageWrapper isPrivate={true}>
       {!isLoading && !room && (
         <div style={{ color: "#fff" }}>
           <h1>Room not found, you may want to go back</h1>
-          <a href="/">Home</a>
+          <a style={{ color: "#fff" }} href="/">
+            Home
+          </a>
         </div>
       )}
-      {room?.status === 0 && <Lobby />}
-      {room?.status === 1 && <UserEntry />}
-      {room?.status === 2 && quest && (
-        <Canvas
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          settings={settings}
-          scale={size.scale}
-        />
+      {room?.status === GAME_STATUS.WaitingForStart && <Lobby />}
+      {room?.status === GAME_STATUS.WaitingForInitialSentences && <UserEntry />}
+      {room?.status === GAME_STATUS.WaitingForDrawings && quest && (
+        <Canvas settings={settings} scale={size.scale} />
       )}
-      {room?.status === 3 && quest && (
-        <Canvas
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          settings={settings}
-          scale={size.scale}
-          readonly
-        />
+      {room?.status === GAME_STATUS.WaitingForSentences && quest && (
+        <Canvas settings={settings} scale={size.scale} readonly />
       )}
+      <div id="game-bgm">
+        <SoundPlayer src="/bgm/game-start.mp3" ref={gameStartAudioRef} />
+        <SoundPlayer src="/bgm/game-bonus.mp3" ref={gameDrawingAudioRef} />
+        <SoundPlayer src="/bgm/game-sentence.mp3" ref={gameSentenceAudioRef} />
+      </div>
     </PageWrapper>
   );
 }

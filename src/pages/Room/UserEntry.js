@@ -62,8 +62,8 @@ export default function UserEntry() {
             }}
           >
             <div className="input-group">
-              <label htmlFor="username">
-                Enter Your Sentence, this is what your friends will draw
+              <label htmlFor="sentence">
+                Enter Your Sentence, this is what your friends will try to draw
               </label>
               <input
                 type="text"
