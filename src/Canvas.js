@@ -34,7 +34,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
       clearCanvas(ctx);
       for (const item of history.current) {
         getContext(item, ctx);
-        drawModes(item.mode, ctx, null, item.path);
+        drawModes(item.mode, ctx, null, item.path, true);
       }
       render();
     }
@@ -122,7 +122,11 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     drawModes(settings.current.mode, context.current, point, lastPath);
   };
 
-  const drawModes = (mode, ctx, point, path) => {
+  const drawModes = (mode, ctx, point, path, initialDraw = false) => {
+    if (readonly && !initialDraw) {
+      return;
+    }
+
     switch (mode) {
       case MODES.PEN:
         point ? previewPen(point, ctx) : drawPen(path, ctx);
