@@ -3,7 +3,7 @@ import { useAppStore } from "./store/appStore";
 import { toast } from "react-toastify";
 
 export const httpClient = axios.create({
-  baseURL: "http://localhost:4000",
+  baseURL: process.env.REACT_APP_BACKEND_URL,
   withCredentials: true,
 });
 
