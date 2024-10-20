@@ -5,6 +5,7 @@ import ToolBar from "./Toolbar";
 import { useRoomStore } from "./store/roomStore";
 import { DrawGuessInput } from "./pages/Room/DrawGuessInput";
 import { BottomBar } from "./pages/Room/BottomBar";
+import { useIsMobile } from "./hooks";
 
 let lastPath = [];
 
@@ -23,6 +24,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
   const moving = useRef(false);
   const scaleRatio = 1 / scale;
   const quest = useRoomStore((state) => state.quest);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const ctx = getContext();
@@ -284,10 +286,11 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          flexWrap: isMobile ? "wrap" : "nowrap",
           gap: 10,
         }}
       >
-        {quest.type === 0 && (
+        {quest.type === 0 && !isMobile && (
           <ColorPalette
             value={settings.current.color}
             onSelectColor={(color) => (settings.current.color = color)}
@@ -297,7 +300,6 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
           className="custom-scroll"
           style={{
             overflow: "auto",
-            touchAction: "none",
             background: "#332344",
             border: "10px solid #332344",
             borderRadius: 15,
@@ -330,6 +332,12 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
             }
           />
         </div>
+        {quest.type === 0 && isMobile && (
+          <ColorPalette
+            value={settings.current.color}
+            onSelectColor={(color) => (settings.current.color = color)}
+          />
+        )}
         {quest.type === 0 && (
           <ToolBar
             canvas={canvas}

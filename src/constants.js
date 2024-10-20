@@ -10,6 +10,7 @@ export const MODES = {
 export const PAN_LIMIT = 1516;
 export const CANVAS_HEIGHT = 848;
 export const CANVAS_WIDTH = 1516;
+export const MOBILE_WINDOW_TRESHOLD = 640;
 
 export const MODEL_BUTTONS = [
   {

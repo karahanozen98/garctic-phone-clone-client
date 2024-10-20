@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
+import { useIsMobile } from "./hooks";
 
 const ColorPalette = ({ value, onSelectColor }) => {
+  const isMobile = useIsMobile();
   const colors = [
-    "#FF5733", // Red
-    "#33FF57", // Green
-    "#3357FF", // Blue
+    "#000", // Red
+    "#555", // Red
+    "#FF0000", // Red
+    "#22FF00", // Green
+    "#2222FF", // Blue
     "#FF33A1", // Pink
     "#33FFF9", // Aqua
-    "#FFC300", // Yellow
+    "#FFFF00", // Yellow
+    "#FF8C00", // Orange
     "#900C3F", // Purple
     "#DAF7A6", // Light Green
     "#581845", // Dark Purple
-    "#FF8C00", // Orange
   ];
 
   const [selectedColor, setSelectedColor] = useState(value);
@@ -41,7 +45,7 @@ const ColorPalette = ({ value, onSelectColor }) => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "auto auto",
+          gridTemplateColumns: "auto auto auto",
         }}
       >
         {colors.map((color, index) => (
@@ -50,8 +54,8 @@ const ColorPalette = ({ value, onSelectColor }) => {
             onClick={() => handleColorClick(color)}
             style={{
               backgroundColor: color,
-              width: "20px",
-              height: "20px",
+              width: isMobile ? 20 : 30,
+              height: isMobile ? 20 : 30,
               cursor: "pointer",
               margin: 10,
               border:
@@ -62,15 +66,10 @@ const ColorPalette = ({ value, onSelectColor }) => {
         ))}
       </div>
       <input
+        className="color-input"
         type="color"
         title="Select color"
         value={selectedColor}
-        style={{
-          width: "40px",
-          height: "40px",
-          margin: "5px",
-          borderRadius: "50%",
-        }}
         onChange={handleColorPicker}
       />
     </div>
