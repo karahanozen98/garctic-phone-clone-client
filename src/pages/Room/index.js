@@ -68,13 +68,13 @@ function RoomPage() {
   const playGameStatusChangeSounds = (status) => {
     switch (status) {
       case GAME_STATUS.WaitingForInitialSentences:
-        gameStartAudioRef.current.play();
+        gameStartAudioRef.current?.play();
         break;
       case GAME_STATUS.WaitingForDrawings:
-        gameDrawingAudioRef.current.play();
+        gameDrawingAudioRef.current?.play();
         break;
       case GAME_STATUS.WaitingForSentences:
-        gameSentenceAudioRef.current.play();
+        gameSentenceAudioRef.current?.play();
         break;
       default:
         break;
