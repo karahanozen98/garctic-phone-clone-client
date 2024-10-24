@@ -1,5 +1,5 @@
-import { MODEL_BUTTONS } from "./constants";
-import { useIsMobile } from "./hooks";
+import { MODEL_BUTTONS } from "../../constants";
+import { useIsMobile } from "../../hooks";
 
 export default function ToolBar({
   canvas,
@@ -75,7 +75,7 @@ export default function ToolBar({
           display: "grid",
           gap: "10px",
           padding: 10,
-          gridTemplateColumns: isMobile ? "auto auto auto" : "auto auto",
+          gridTemplateColumns: "auto auto auto",
         }}
       >
         {MODEL_BUTTONS.map((btn) => (

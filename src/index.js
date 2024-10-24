@@ -1,29 +1,46 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import RoomPage from "./pages/Room/index";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/Login";
+import HomePage from "./pages/Home";
+import { PageWrapper } from "./components/PageWrapper";
+import "./index.css";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <PageWrapper isPrivate={true}>
+        <HomePage />
+      </PageWrapper>
+    ),
   },
   {
     path: "/room/:id",
-    element: <RoomPage />,
+    element: (
+      <PageWrapper isPrivate={true}>
+        <RoomPage />
+      </PageWrapper>
+    ),
   },
   {
     path: "/login",
-    element: <LoginPage />,
+    element: (
+      <PageWrapper>
+        <LoginPage />
+      </PageWrapper>
+    ),
   },
   {
     path: "*",
-    element: <NotFound />,
+    element: (
+      <PageWrapper>
+        <NotFound />
+      </PageWrapper>
+    ),
   },
 ]);
 

@@ -1,11 +1,13 @@
 import { useEffect, useReducer, useRef, useState } from "react";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, MODES, PAN_LIMIT } from "./constants";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, MODES, PAN_LIMIT } from "../../constants";
 import ColorPalette from "./ColorPalette";
-import ToolBar from "./Toolbar";
-import { useRoomStore } from "./store/roomStore";
-import { DrawGuessInput } from "./pages/Room/DrawGuessInput";
-import { BottomBar } from "./pages/Room/BottomBar";
-import { useIsMobile } from "./hooks";
+import CanvasToolbar from "./CanvasToolbar";
+import { useRoomStore } from "../../store/roomStore";
+import { DrawGuessInput } from "./DrawGuessInput";
+import { BottomBar } from "./BottomBar";
+import { useIsMobile } from "../../hooks";
+import CanvasHeader from "./CanvasHeader";
+import CanvasLeftMenu from "./CanvasLeftMenu";
 
 let lastPath = [];
 
@@ -290,48 +292,42 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
           gap: 10,
         }}
       >
-        {quest.type === 0 && !isMobile && (
-          <ColorPalette
-            value={settings.current.color}
-            onSelectColor={(color) => (settings.current.color = color)}
-          />
-        )}
+        <CanvasLeftMenu settings={settings} />
         <div
-          className="custom-scroll"
           style={{
-            overflow: "auto",
             background: "#332344",
             border: "10px solid #332344",
             borderRadius: 15,
+            maxWidth: CANVAS_WIDTH + 10,
+            width: "100%",
           }}
         >
-          {quest?.type === 0 ? (
-            <div style={{ color: "white", fontWeight: "bold", padding: 10 }}>
-              <h2 style={{ color: "#40E0D0" }}>HEY IT'S TIME TO DRAW!</h2>
-              <h1>{quest?.content?.toUpperCase()}</h1>
-            </div>
-          ) : (
-            <div style={{ color: "white", fontWeight: "bold", padding: 10 }}>
-              <h2 style={{ color: "#40E0D0" }}>
-                HEY IT'S TIME TO GUESS THE DRAWING!
-              </h2>
-            </div>
-          )}
-          <canvas
-            ref={canvas}
+          <div
+            className="custom-scroll"
             style={{
-              border: "1px solid black",
-              backgroundColor: "white",
-              touchAction: "none",
+              overflow: "auto",
             }}
-            width={width}
-            height={height}
-            onPointerDown={onPointerDown}
-            className={
-              settings.current.mode === MODES.PAN ? "moving" : "drawing"
-            }
-          />
+          >
+            <CanvasHeader />
+            <canvas
+              ref={canvas}
+              style={{
+                border: "1px solid black",
+                backgroundColor: "white",
+                touchAction: "none",
+              }}
+              width={width}
+              height={height}
+              onPointerDown={onPointerDown}
+              className={
+                settings.current.mode === MODES.PAN ? "moving" : "drawing"
+              }
+            />
+          </div>
+          {readonly && <DrawGuessInput />}
+          {!readonly && <BottomBar settings={settings} history={history} />}
         </div>
+
         {quest.type === 0 && isMobile && (
           <ColorPalette
             value={settings.current.color}
@@ -339,7 +335,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
           />
         )}
         {quest.type === 0 && (
-          <ToolBar
+          <CanvasToolbar
             canvas={canvas}
             context={context}
             drawing={drawing}
@@ -351,8 +347,6 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
           />
         )}
       </div>
-      {!readonly && <BottomBar settings={settings} history={history} />}
-      {readonly && <DrawGuessInput />}
     </div>
   );
 };

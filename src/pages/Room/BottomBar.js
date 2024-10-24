@@ -2,6 +2,7 @@ import { useRoomStore } from "../../store/roomStore";
 import { useParams } from "react-router-dom";
 import ThicknessSelector from "./ThicknessSelector";
 import { useIsMobile } from "../../hooks";
+import { toast } from "react-toastify";
 
 export function BottomBar({ settings, history }) {
   const { id } = useParams();
@@ -10,6 +11,11 @@ export function BottomBar({ settings, history }) {
   const isMobile = useIsMobile();
 
   const handleSendDrawing = () => {
+    if (history.current.length <= 0) {
+      toast.warn("You haven't drawn anything");
+      return;
+    }
+
     const canvasState = history.current;
 
     if (history.current.length > 0) {

@@ -8,6 +8,7 @@ export default function ProfileCard({ player, index }) {
           alignItems: "center",
           padding: 10,
           margin: 10,
+          gap: 10,
         }}
       >
         <img
@@ -16,6 +17,17 @@ export default function ProfileCard({ player, index }) {
           alt="avatar"
         />
         <h3>{player.username}</h3>
+        {player.isReady ? (
+          <i
+            className="fa-solid fa-check fa-2xl"
+            style={{ color: "#63E6BE" }}
+          ></i>
+        ) : (
+          <i
+            className="fa-solid fa-hourglass-start fa-xl"
+            style={{ animation: `spin ${3}s linear infinite` }}
+          ></i>
+        )}
       </div>
     </div>
   );

@@ -3,16 +3,26 @@ import Card from "../../components/Card";
 import { useRoomStore } from "../../store/roomStore";
 import { useParams } from "react-router-dom";
 import ProfileCard from "./ProfileCard";
+import { socket } from "../../socket";
 
 export default function UserEntry() {
+  const { id } = useParams();
   const [sentence, setSentence] = useState();
-  const room = useRoomStore((state) => state.room);
+  const players = useRoomStore((state) => state.players);
+  const updatePlayers = useRoomStore((state) => state.updatePlayers);
   const joinRoom = useRoomStore((state) => state.joinRoom);
   const sendSentence = useRoomStore((state) => state.sendSentence);
-  const { id } = useParams();
+  const playerUpdateEvent = `player-update-${id}`;
 
   useEffect(() => {
     joinRoom(id);
+
+    socket.on(playerUpdateEvent, ({ players }) => {
+      updatePlayers([...players]);
+    });
+    return () => {
+      socket.off(playerUpdateEvent);
+    };
   }, []);
 
   const handleSaveSentence = (event) => {
@@ -40,7 +50,7 @@ export default function UserEntry() {
         }}
       >
         <div style={{ padding: 10, flex: 1 }}>
-          {room.players.map((player, index) => (
+          {players.map((player, index) => (
             <ProfileCard key={player.id} index={index} player={player} />
           ))}
         </div>

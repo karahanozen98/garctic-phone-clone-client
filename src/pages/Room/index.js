@@ -1,11 +1,10 @@
 import { useEffect, useRef } from "react";
 import { GAME_STATUS, MODES } from "../../constants";
 import { useWindowSize } from "../../hooks";
-import Canvas from "../../Canvas";
+import Canvas from "./Canvas";
 import { useParams } from "react-router-dom";
 import { useRoomStore } from "../../store/roomStore";
 import Lobby from "./Lobby";
-import { PageWrapper } from "../../components/PageWrapper";
 import { socket } from "../../socket";
 import UserEntry from "./UserEntry";
 import { useAppStore } from "../../store/appStore";
@@ -82,7 +81,7 @@ function RoomPage() {
   };
 
   return (
-    <PageWrapper isPrivate={true}>
+    <>
       {!isLoading && !room && (
         <div style={{ color: "#fff" }}>
           <h1>Room not found, you may want to go back</h1>
@@ -104,7 +103,7 @@ function RoomPage() {
         <SoundPlayer src="/bgm/game-bonus.mp3" ref={gameDrawingAudioRef} />
         <SoundPlayer src="/bgm/game-sentence.mp3" ref={gameSentenceAudioRef} />
       </div>
-    </PageWrapper>
+    </>
   );
 }
 

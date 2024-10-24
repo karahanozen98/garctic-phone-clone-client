@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import ProfileCard from "./ProfileCard";
 
 export default function Lobby() {
-  const room = useRoomStore((state) => state.room);
+  const players = useRoomStore((state) => state.players);
   const joinRoom = useRoomStore((state) => state.joinRoom);
   const startGame = useRoomStore((state) => state.startGame);
   const { id } = useParams();
@@ -67,7 +67,7 @@ export default function Lobby() {
         </button>
       </div>
       <div style={{ padding: 10 }}>
-        {room.players.map((player, index) => (
+        {players.map((player, index) => (
           <ProfileCard key={player.id} index={index} player={player} />
         ))}
       </div>

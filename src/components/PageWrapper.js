@@ -18,7 +18,7 @@ export function PageWrapper({ isPrivate, children }) {
     if (isPrivate) {
       handleAuthentication();
     }
-  }, []);
+  }, [isPrivate, handleAuthentication]);
 
   return (
     <div className={backgroundColor}>

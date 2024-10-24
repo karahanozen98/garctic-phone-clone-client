@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useIsMobile } from "./hooks";
+import { useIsMobile } from "../../hooks";
 
 const ColorPalette = ({ value, onSelectColor }) => {
   const isMobile = useIsMobile();
@@ -39,6 +39,7 @@ const ColorPalette = ({ value, onSelectColor }) => {
       style={{
         padding: "10px",
         background: "#332344",
+        border: "3px solid #fff",
         borderRadius: 10,
       }}
     >
