@@ -17,6 +17,7 @@ export default function CanvasPlayerList() {
     return () => {
       socket.off(playerUpdateEvent);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -33,7 +34,7 @@ export default function CanvasPlayerList() {
       }}
     >
       {players.map((player, index) => (
-        <ProfileCard key={player.id} index={index} player={player} />
+        <ProfileCard key={player.id} player={player} showIsReadyView />
       ))}
     </div>
   );

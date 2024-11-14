@@ -23,6 +23,7 @@ export default function UserEntry() {
     return () => {
       socket.off(playerUpdateEvent);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSaveSentence = (event) => {
@@ -50,8 +51,8 @@ export default function UserEntry() {
         }}
       >
         <div style={{ padding: 10, flex: 1 }}>
-          {players.map((player, index) => (
-            <ProfileCard key={player.id} index={index} player={player} />
+          {players.map((player) => (
+            <ProfileCard key={player.id} player={player} showIsReadyView />
           ))}
         </div>
         <div

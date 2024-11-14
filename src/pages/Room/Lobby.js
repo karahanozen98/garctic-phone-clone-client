@@ -13,6 +13,7 @@ export default function Lobby() {
 
   useEffect(() => {
     joinRoom(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleStartGame = () => {
@@ -67,8 +68,8 @@ export default function Lobby() {
         </button>
       </div>
       <div style={{ padding: 10 }}>
-        {players.map((player, index) => (
-          <ProfileCard key={player.id} index={index} player={player} />
+        {players.map((player) => (
+          <ProfileCard key={player.id} player={player} />
         ))}
       </div>
       <button className="success bold" onClick={handleStartGame}>
