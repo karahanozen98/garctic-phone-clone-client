@@ -9,6 +9,7 @@ import { socket } from "../../socket";
 import UserEntry from "./UserEntry";
 import { useAppStore } from "../../store/appStore";
 import SoundPlayer from "../../components/SoundPlayer";
+import { DrawingShowcase } from "./DrawingShowcase";
 
 function RoomPage() {
   const params = useParams();
@@ -46,6 +47,8 @@ function RoomPage() {
     } else if (room.status === GAME_STATUS.WaitingForSentences) {
       setBgSecondary();
       getMyQuest(params.id);
+    } else if (room.status === GAME_STATUS.DrawingShowcase) {
+      setBgPrimary();
     }
     // if game status changes play bgm
     if (previousGameStatus.current !== room.status) {
@@ -53,6 +56,7 @@ function RoomPage() {
     }
 
     previousGameStatus.current = room.status;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, getMyQuest, params.id]);
 
   useEffect(() => {
@@ -62,6 +66,7 @@ function RoomPage() {
     return () => {
       socket.off(roomUpdateEvent);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const playGameStatusChangeSounds = (status) => {
@@ -96,8 +101,27 @@ function RoomPage() {
         <Canvas settings={settings} scale={size.scale} />
       )}
       {room?.status === GAME_STATUS.WaitingForSentences && quest && (
-        <Canvas settings={settings} scale={size.scale} readonly />
+        <Canvas
+          settings={settings}
+          scale={size.scale}
+          content={quest.content}
+          readonly
+          hideToolbar
+          hideLeftMenu
+          hideColorPalette
+          showGuessInput
+        />
       )}
+      {room?.status === GAME_STATUS.DrawingShowcase && <DrawingShowcase />}
+      {room?.status === GAME_STATUS.Finished && (
+        <div style={{ color: "#fff" }}>
+          <h1>Game is ended, you may want to go back to home page</h1>
+          <a style={{ color: "#fff" }} href="/">
+            Home
+          </a>
+        </div>
+      )}
+
       <div id="game-bgm">
         <SoundPlayer src="/bgm/game-start.mp3" ref={gameStartAudioRef} />
         <SoundPlayer src="/bgm/game-bonus.mp3" ref={gameDrawingAudioRef} />

@@ -1,5 +1,4 @@
 import { MODEL_BUTTONS } from "../../constants";
-import { useIsMobile } from "../../hooks";
 
 export default function ToolBar({
   canvas,
@@ -11,7 +10,6 @@ export default function ToolBar({
   drawCanvas,
   render,
 }) {
-  const isMobile = useIsMobile();
   const prevent = (e) => {
     e.preventDefault();
     e.stopPropagation();

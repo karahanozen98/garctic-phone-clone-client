@@ -2,7 +2,6 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, MODES, PAN_LIMIT } from "../../constants";
 import ColorPalette from "./ColorPalette";
 import CanvasToolbar from "./CanvasToolbar";
-import { useRoomStore } from "../../store/roomStore";
 import { DrawGuessInput } from "./DrawGuessInput";
 import { BottomBar } from "./BottomBar";
 import { useIsMobile } from "../../hooks";
@@ -11,7 +10,17 @@ import CanvasLeftMenu from "./CanvasLeftMenu";
 
 let lastPath = [];
 
-const Canvas = ({ settings, scale, readonly, ...rest }) => {
+const Canvas = ({
+  settings,
+  scale = 1,
+  content,
+  readonly,
+  hideHeader,
+  hideLeftMenu,
+  hideToolbar,
+  hideColorPalette,
+  showGuessInput,
+}) => {
   const width = Math.min(CANVAS_WIDTH, PAN_LIMIT);
   const height = Math.min(CANVAS_HEIGHT, PAN_LIMIT);
   const [drawing, setDrawing] = useState(false);
@@ -24,25 +33,19 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
   const history = useRef([]);
   const redoHistory = useRef([]);
   const moving = useRef(false);
-  const scaleRatio = 1 / scale;
-  const quest = useRoomStore((state) => state.quest);
   const isMobile = useIsMobile();
-
   useEffect(() => {
-    const ctx = getContext();
-    clearCanvas(ctx);
-    history.current = [];
-
-    if (quest && quest?.type === 1) {
-      history.current = quest.content;
+    if (content) {
+      const ctx = getContext();
       clearCanvas(ctx);
+      history.current = content;
       for (const item of history.current) {
         getContext(item, ctx);
-        drawModes(item.mode, ctx, null, item.path, true);
+        drawModes(item.mode, ctx, null, item.path, item.scaleRatio, true);
       }
-      render();
     }
-  }, [quest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
 
   const prevent = (e) => {
     e.preventDefault();
@@ -61,7 +64,13 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     draw.current = true;
     const point = getPoints(e, context.current);
     lastPath = [];
-    drawModes(settings.current.mode, context.current, point, lastPath);
+    drawModes(
+      settings.current.mode,
+      context.current,
+      point,
+      lastPath,
+      calcScaleRatio()
+    );
   };
 
   const onPointerUp = (e) => {
@@ -76,6 +85,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
       history.current.push({
         ...settings.current,
         path: lastPath,
+        scaleRatio: calcScaleRatio(),
       });
       redoHistory.current = [];
       lastPath = [];
@@ -123,38 +133,55 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     if (moving.current) return onCanvasMove(e, context.current);
     if (!draw.current) return;
     const point = getPoints(e, context.current);
-    drawModes(settings.current.mode, context.current, point, lastPath);
+    drawModes(
+      settings.current.mode,
+      context.current,
+      point,
+      lastPath,
+      calcScaleRatio()
+    );
   };
 
-  const drawModes = (mode, ctx, point, path, initialDraw = false) => {
+  const drawModes = (
+    mode,
+    ctx,
+    point,
+    path,
+    scaleRatio = 1,
+    initialDraw = false
+  ) => {
     if (readonly && !initialDraw) {
       return;
     }
 
     switch (mode) {
       case MODES.PEN:
-        point ? previewPen(point, ctx) : drawPen(path, ctx);
+        point
+          ? previewPen(point, scaleRatio, ctx)
+          : drawPen(path, scaleRatio, ctx);
         break;
       case MODES.RECT:
         if (point) {
           path.length === 0 ? (path[0] = point) : (path[1] = point);
-          previewRect(path, ctx);
+          previewRect(path, scaleRatio, ctx);
         } else {
-          drawRect(path, ctx);
+          drawRect(path, scaleRatio, ctx);
         }
         break;
       case MODES.CIRCLE:
         if (point) {
           path.length === 0 ? (path[0] = point) : (path[1] = point);
-          previewCircle(path, ctx);
+          previewCircle(path, scaleRatio, ctx);
         } else {
-          drawCircle(path, ctx);
+          drawCircle(path, scaleRatio, ctx);
         }
         break;
       case MODES.ERASER:
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 30;
-        point ? previewPen(point, ctx) : drawPen(path, ctx);
+        point
+          ? previewPen(point, scaleRatio, ctx)
+          : drawPen(path, scaleRatio, ctx);
         break;
       default:
         return;
@@ -181,13 +208,13 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     return [e.clientX - rect.x - dx, e.clientY - rect.y - dy];
   };
 
-  const previewRect = (path, ctx) => {
+  const previewRect = (path, scaleRatio, ctx) => {
     if (path.length < 2) return;
     drawCanvas(ctx);
-    drawRect(path, getContext(settings.current, ctx));
+    drawRect(path, scaleRatio, getContext(settings.current, ctx));
   };
 
-  const drawRect = (path, ctx) => {
+  const drawRect = (path, scaleRatio, ctx) => {
     ctx.beginPath();
     ctx.rect(
       path[0][0] * scaleRatio,
@@ -198,18 +225,18 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     ctx.stroke();
   };
 
-  const previewCircle = (path, ctx) => {
+  const previewCircle = (path, scaleRatio, ctx) => {
     if (path.length < 2) return;
     drawCanvas(ctx);
     getContext(settings.current, ctx); // reset context
-    drawCircle(path, ctx);
+    drawCircle(path, scaleRatio, ctx);
   };
 
   const getDistance = ([[p1X, p1Y], [p2X, p2Y]]) => {
     return Math.sqrt(Math.pow(p1X - p2X, 2) + Math.pow(p1Y - p2Y, 2));
   };
 
-  const drawCircle = (path, ctx) => {
+  const drawCircle = (path, scaleRatio, ctx) => {
     ctx.beginPath();
     ctx.arc(
       path[0][0] * scaleRatio,
@@ -221,7 +248,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     ctx.stroke();
   };
 
-  const previewPen = (point, ctx) => {
+  const previewPen = (point, scaleRatio, ctx) => {
     if (lastPath.length === 0) {
       ctx.beginPath();
       ctx.moveTo(point[0] * scaleRatio, point[1] * scaleRatio);
@@ -231,7 +258,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     lastPath.push(point);
   };
 
-  const drawPen = (points, ctx) => {
+  const drawPen = (points, scaleRatio, ctx) => {
     ctx.beginPath();
     ctx.moveTo(points[0][0] * scaleRatio, points[0][1] * scaleRatio);
     for (const p of points) {
@@ -251,23 +278,15 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
     clearCanvas(ctx);
     for (const item of history.current) {
       getContext(item, ctx);
-      drawModes(item.mode, ctx, null, item.path);
+      drawModes(item.mode, ctx, null, item.path, item.scaleRatio);
     }
   };
+
+  const calcScaleRatio = () => 1 / scale;
 
   useEffect(() => {
     document.addEventListener("pointerup", onPointerUp);
     document.addEventListener("pointermove", onPointerMove);
-    // getContext().setTransform(
-    //   1,
-    //   0,
-    //   0,
-    //   1,
-    //   -(PAN_LIMIT - width) / 2,
-    //   -(PAN_LIMIT - height) / 2
-    // );
-    drawCanvas(getContext());
-    updatePreview();
     return () => {
       document.removeEventListener("pointerup", onPointerUp);
       document.removeEventListener("pointermove", onPointerMove);
@@ -292,7 +311,7 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
           gap: 10,
         }}
       >
-        <CanvasLeftMenu settings={settings} />
+        {!hideLeftMenu && <CanvasLeftMenu settings={settings} />}
         <div
           style={{
             background: "#332344",
@@ -300,6 +319,8 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
             borderRadius: 15,
             maxWidth: CANVAS_WIDTH + 10,
             width: "100%",
+            minWidth: 500,
+            flex: "1 1 200px",
           }}
         >
           <div
@@ -308,14 +329,10 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
               overflow: "auto",
             }}
           >
-            <CanvasHeader />
+            {!hideHeader && <CanvasHeader />}
             <canvas
               ref={canvas}
-              style={{
-                border: "1px solid black",
-                backgroundColor: "white",
-                touchAction: "none",
-              }}
+              style={{ backgroundColor: "#fff", touchAction: "none" }}
               width={width}
               height={height}
               onPointerDown={onPointerDown}
@@ -324,17 +341,17 @@ const Canvas = ({ settings, scale, readonly, ...rest }) => {
               }
             />
           </div>
-          {readonly && <DrawGuessInput />}
+          {showGuessInput && <DrawGuessInput />}
           {!readonly && <BottomBar settings={settings} history={history} />}
         </div>
 
-        {quest.type === 0 && isMobile && (
+        {!hideColorPalette && isMobile && (
           <ColorPalette
             value={settings.current.color}
             onSelectColor={(color) => (settings.current.color = color)}
           />
         )}
-        {quest.type === 0 && (
+        {!hideToolbar && (
           <CanvasToolbar
             canvas={canvas}
             context={context}

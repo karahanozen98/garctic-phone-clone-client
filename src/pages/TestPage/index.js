@@ -40,12 +40,13 @@ function TestPage() {
       {tab === 2 && (
         <Canvas
           settings={settings}
-          scale={size.scale}
+          scale={0.5}
           content={content}
           readonly
           hideToolbar
           hideColorPalette
           hideHeader
+          hideLeftMenu
         />
       )}
     </div>
