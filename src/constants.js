@@ -45,4 +45,11 @@ export const GAME_STATUS = {
   WaitingForInitialSentences: 1,
   WaitingForDrawings: 2,
   WaitingForSentences: 3,
+  DrawingShowcase: 4,
+  Finished: 5,
+};
+
+export const ENTRY_TYPE = {
+  Sentence: 0,
+  Drawing: 1,
 };

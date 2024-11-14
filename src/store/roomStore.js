@@ -5,6 +5,7 @@ export const useRoomStore = create((set) => ({
   room: null,
   quest: null,
   players: [],
+  showcase: [],
   getRoomById: async (id) => {
     const { data: room } = await httpClient.get(`/room/${id}`);
     set((state) => ({ ...state, room, players: room.players }));
@@ -24,11 +25,21 @@ export const useRoomStore = create((set) => ({
   sendSentence: async (id, sentence) => {
     await httpClient.put(`/room/${id}/sentence`, { sentence });
   },
-  sendDrawing: async (id, { quest, drawing }) => {
-    await httpClient.put(`/room/${id}/drawing`, { quest, drawing });
+  sendDrawing: async (id, { drawing }) => {
+    await httpClient.put(`/room/${id}/drawing`, { drawing });
   },
   getMyQuest: async (id) => {
     const { data: quest } = await httpClient.get(`/room/${id}/getMyQuest`);
     set(() => ({ quest }));
+  },
+  getShowcase: async (id) => {
+    const { data } = await httpClient.get(`/room/${id}/getShowcase`);
+    set((state) => ({ ...state, showcase: data }));
+  },
+  moveToNextShowcase: async (id) => {
+    await httpClient.put(`/room/${id}/moveToNextShowcase`);
+  },
+  setShowcase: (showcase) => {
+    set((state) => ({ ...state, showcase }));
   },
 }));

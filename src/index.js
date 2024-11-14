@@ -6,6 +6,7 @@ import RoomPage from "./pages/Room/index";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/Login";
 import HomePage from "./pages/Home";
+import TestPage from "./pages/TestPage";
 import { PageWrapper } from "./components/PageWrapper";
 import "./index.css";
 
@@ -31,6 +32,14 @@ const router = createBrowserRouter([
     element: (
       <PageWrapper>
         <LoginPage />
+      </PageWrapper>
+    ),
+  },
+  {
+    path: "/test-page",
+    element: (
+      <PageWrapper>
+        <TestPage />
       </PageWrapper>
     ),
   },

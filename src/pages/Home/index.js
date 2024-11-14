@@ -58,7 +58,7 @@ export default function HomePage() {
           </button>
         </div>
         <img
-          src="https://garticphone.com/images/avatar/1.svg"
+          src="https://garticphone.com/images/avatar/0.svg"
           alt="avatar"
           width={100}
         />
@@ -90,7 +90,7 @@ export default function HomePage() {
                 type="number"
                 id="maxPlayers"
                 value={maxPlayers}
-                onChange={(e) => setMaxPlayers(e.target.value)}
+                onChange={(e) => setMaxPlayers(Number(e.target.value))}
                 required
               />
             </div>
@@ -100,7 +100,7 @@ export default function HomePage() {
                 type="number"
                 id="numberOfTurns"
                 value={numberOfTurns}
-                onChange={(e) => setNumberOfTurns(e.target.value)}
+                onChange={(e) => setNumberOfTurns(Number(e.target.value))}
                 required
               />
             </div>

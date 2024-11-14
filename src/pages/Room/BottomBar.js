@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 export function BottomBar({ settings, history }) {
   const { id } = useParams();
   const sendDrawing = useRoomStore((state) => state.sendDrawing);
-  const quest = useRoomStore((state) => state.quest);
   const isMobile = useIsMobile();
 
   const handleSendDrawing = () => {
@@ -19,7 +18,7 @@ export function BottomBar({ settings, history }) {
     const canvasState = history.current;
 
     if (history.current.length > 0) {
-      sendDrawing(id, { quest, drawing: canvasState });
+      sendDrawing(id, { drawing: canvasState });
     }
   };
 
