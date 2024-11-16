@@ -215,6 +215,7 @@ const Canvas = ({
   };
 
   const drawRect = (path, scaleRatio, ctx) => {
+    if (!isValidPath(path)) return;
     ctx.beginPath();
     ctx.rect(
       path[0][0] * scaleRatio,
@@ -237,6 +238,7 @@ const Canvas = ({
   };
 
   const drawCircle = (path, scaleRatio, ctx) => {
+    if (!isValidPath(path)) return;
     ctx.beginPath();
     ctx.arc(
       path[0][0] * scaleRatio,
@@ -283,6 +285,16 @@ const Canvas = ({
   };
 
   const calcScaleRatio = () => 1 / scale;
+
+  const isValidPath = (path) => {
+    return (
+      Array.isArray(path) &&
+      Array.isArray(path.at(0)) &&
+      path[0].length === 2 &&
+      Array.isArray(path.at(1)) &&
+      path[1].length === 2
+    );
+  };
 
   useEffect(() => {
     document.addEventListener("pointerup", onPointerUp);
